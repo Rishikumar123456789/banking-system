@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: deposit-service
+
+  config:
+    import: optional:configserver:http://config-server:8888   # 👈 use service name
+
+  profiles:
+    active: dev

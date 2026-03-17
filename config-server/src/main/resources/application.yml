@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: config-server
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/Rishikumar123456789/state-bank-confg-repo.git
+          default-label: main
+          clone-on-start: true
+
+server:
+  port: 8888
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/

@@ -1,0 +1,79 @@
+pipeline {
+agent { label 'java-node' }
+
+
+tools {
+    jdk 'java17'
+    maven 'maven-3'
+}
+
+environment {
+    IMAGE_NAME = "rishikumarandugala/state-bank-config-server"
+    IMAGE_TAG = "${BUILD_NUMBER}"
+    HELM_CHART_PATH = "config-server/helm/config-server-chart"
+}
+
+stages {
+
+    stage('Clone Repository') {
+        steps {
+            git branch: 'main', url: 'https://github.com/Rishikumar123456789/statebank.git'
+        }
+    }
+
+    stage('Build Config Server') {
+        steps {
+            dir('config-server') {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+    }
+
+    stage('Build Docker Image') {
+        steps {
+            dir('config-server') {
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+            }
+        }
+    }
+
+    stage('Login to DockerHub') {
+        steps {
+            withCredentials([usernamePassword(
+                credentialsId: 'dockerhub',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
+            )]) {
+                sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+            }
+        }
+    }
+
+    stage('Push Image to DockerHub') {
+        steps {
+            sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
+        }
+    }
+
+    stage('Deploy to Kubernetes using Helm') {
+        steps {
+            sh """
+            helm upgrade --install config-server $HELM_CHART_PATH \
+            --set image.repository=$IMAGE_NAME \
+            --set image.tag=$IMAGE_TAG
+            """
+        }
+    }
+}
+
+post {
+    success {
+        echo "Deployment successful! Kubernetes updated with new Docker image."
+    }
+    failure {
+        echo "Pipeline failed. Please check Jenkins logs."
+    }
+}
+
+
+}
