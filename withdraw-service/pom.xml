@@ -78,6 +78,11 @@
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>io.github.rishikumar123456789</groupId>
+            <artifactId>statebank-library</artifactId>
+            <version>1.7</version>
+         </dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
