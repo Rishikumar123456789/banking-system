@@ -1,7 +1,6 @@
 package com.balancecheckservice;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +15,7 @@ public class BalanceDetailController {
 @Autowired
 public BalanceDetailsService balanceDetailsService;
 @GetMapping("/getBalanceDetails/{accountNumber}")
-public Optional<BalanceDetails> getBalanceDetailsByAccountNumber(@PathVariable Long accountNumber) {
+public BalanceDetails getBalanceDetailsByAccountNumber(@PathVariable Long accountNumber) {
 	return balanceDetailsService.findByAccountNumber(accountNumber);
 }
 
