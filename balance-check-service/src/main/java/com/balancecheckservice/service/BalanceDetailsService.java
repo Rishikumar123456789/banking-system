@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.balancecheckservice.model.BalanceDetails;
 import com.balancecheckservice.repo.BalanceDetailsRepo;
 import com.statebank.AccountOpenedEvent;
+import com.statebank.Withdraw;
+import com.statebank.WithdrawStatus;
 @Service
 public class BalanceDetailsService implements BalanceDetailsInterface {
     @Autowired
@@ -24,13 +26,23 @@ public class BalanceDetailsService implements BalanceDetailsInterface {
 	}
 
 	@Override
-	 public Optional<BalanceDetails> findByAccountNumber(Long accountNumber){
+	 public BalanceDetails findByAccountNumber(Long accountNumber){
 		return  balanceDetailsRepo.findByAccountNumber(accountNumber);
 	}
 
 	@Override
 	public List<BalanceDetails> findAllAccountsBalanceDetails() {
 		  return balanceDetailsRepo.findAll();
+	}
+
+	@Override
+	public WithdrawStatus processWithdrawrequest(Withdraw withdraw) {
+	  balanceDetails=balanceDetailsRepo.findByAccountNumber(withdraw.getAccountNumber());
+		balanceDetails.setBalance(balanceDetails.getBalance().subtract(withdraw.getWithDrawAmount()));;
+		balanceDetailsRepo.save(balanceDetails);
+		return WithdrawStatus.SUCCESS;
+		  
+
 	}
 	
 
