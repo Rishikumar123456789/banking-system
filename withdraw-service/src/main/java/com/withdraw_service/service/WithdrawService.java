@@ -5,14 +5,14 @@ import org.springframework.stereotype.Service;
 
 import com.statebank.Withdraw;
 import com.statebank.WithdrawStatus;
-import com.withdraw_service.kafka.WithDrawRequestProducer;
+import com.withdraw_service.kafka.WithDrawRequestEventProducer;
 import com.withdraw_service.model.WithdrawDetails;
 import com.withdraw_service.repo.WithdrawDetailsRepo;
 import com.withdraw_service.repo.WithdrawInterface;
 @Service
 public class WithdrawService implements WithdrawInterface {
     @Autowired
-    WithDrawRequestProducer withDrawRequestProducer;
+    WithDrawRequestEventProducer withDrawRequestEventProducer;
     @Autowired
     WithdrawDetailsRepo withdrawDetailsRepo;
         @Override
@@ -25,7 +25,7 @@ public class WithdrawService implements WithdrawInterface {
     	  withdrawDetails.setWithdrawAmount(withdraw2.getWithDrawAmount());
     	  withdrawDetails.setStatus(WithdrawStatus.PENDING);
     	  withdrawDetailsRepo.save(withdrawDetails);
-    	  withDrawRequestProducer.requestWithDraw(withdraw2);
+    	  withDrawRequestEventProducer.requestWithDraw(withdraw2);
     	  return withdrawDetails;
     	  
     	  
