@@ -10,7 +10,7 @@ import com.statebank.AccountOpenedEvent;
 public class AccountOpenedEventConsumer {
 @Autowired
 public BalanceDetailsService balaceDetailsService;
-@KafkaListener(topics = "account-open-topic",groupId = "account-open-group")
+@KafkaListener(topics = "account-open-topic",groupId = "balance-check-group")
 public void consumeAccountOpendEvent(AccountOpenedEvent event) {
 	balaceDetailsService.updateBalanceDetails(event);
 }
