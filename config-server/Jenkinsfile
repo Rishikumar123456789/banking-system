@@ -56,7 +56,7 @@ pipeline {
 
         stage('Deploy to Kubernetes using Helm') {
             steps {
-                dir('eureka-server') {
+                dir('config-server') {
                     sh '''
                     echo "📦 Checking Helm chart..."
                     ls -l helm/config-server-chart
