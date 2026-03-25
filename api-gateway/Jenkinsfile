@@ -15,12 +15,12 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                deleteDir()   // 🔥 clean workspace (important)
+                deleteDir()   // 🔥 clean workspace
                 git branch: 'main', url: 'https://github.com/Rishikumar123456789/banking-system.git'
             }
         }
 
-        stage('Build Eureka Server') {
+        stage('Build API Gateway') {   // ✅ corrected name
             steps {
                 dir('api-gateway') {
                     sh 'mvn clean package -DskipTests'
@@ -30,8 +30,11 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                dir('api-server') {
-                    sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                dir('api-gateway') {
+                    sh '''
+                    echo "🐳 Building Docker Image..."
+                    docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                    '''
                 }
             }
         }
@@ -43,14 +46,20 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh '''
+                    echo "🔐 Logging into DockerHub..."
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
                 }
             }
         }
 
         stage('Push Image to DockerHub') {
             steps {
-                sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
+                sh '''
+                echo "📤 Pushing Docker Image..."
+                docker push $IMAGE_NAME:$IMAGE_TAG
+                '''
             }
         }
 
@@ -59,8 +68,9 @@ pipeline {
                 dir('api-gateway') {
                     sh '''
                     echo "📦 Checking Helm chart..."
-                    ls -l helm/config-server-chart
+                    ls -l helm/api-gateway-chart
 
+                    echo "🚀 Deploying to Kubernetes..."
                     helm upgrade --install api-gateway helm/api-gateway-chart \
                     --set image.repository=$IMAGE_NAME \
                     --set image.tag=$IMAGE_TAG
@@ -72,7 +82,7 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment successful! Kubernetes updated with new Docker image."
+            echo "✅ Deployment successful! API Gateway deployed."
         }
         failure {
             echo "❌ Pipeline failed. Please check Jenkins logs."
