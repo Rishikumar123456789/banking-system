@@ -7,21 +7,20 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "rishikumarandugala/state-bank-config-server"
+        IMAGE_NAME = "rishikumarandugala/config-server"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        HELM_CHART_PATH = "config-server/helm/config-server-chart"
     }
 
     stages {
 
         stage('Clone Repository') {
             steps {
-				  deleteDir()
-				  git branch: 'main', url: 'https://github.com/Rishikumar123456789/banking-system.git'
+                deleteDir()   // 🔥 clean workspace (important)
+                git branch: 'main', url: 'https://github.com/Rishikumar123456789/banking-system.git'
             }
         }
 
-        stage('Build Config Server') {
+        stage('Build Eureka Server') {
             steps {
                 dir('config-server') {
                     sh 'mvn clean package -DskipTests'
@@ -31,14 +30,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                echo "📁 Checking project structure..."
-                ls -l
-                ls -l config-server
-
-                echo "🐳 Building Docker Image..."
-                docker build -t $IMAGE_NAME:$IMAGE_TAG config-server
-                '''
+                dir('config-server') {
+                    sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                }
             }
         }
 
@@ -62,11 +56,16 @@ pipeline {
 
         stage('Deploy to Kubernetes using Helm') {
             steps {
-                sh '''
-                helm upgrade --install config-server $HELM_CHART_PATH \
-                --set image.repository=$IMAGE_NAME \
-                --set image.tag=$IMAGE_TAG
-                '''
+                dir('eureka-server') {
+                    sh '''
+                    echo "📦 Checking Helm chart..."
+                    ls -l helm/config-server-chart
+
+                    helm upgrade --install config-server helm/config-server-chart \
+                    --set image.repository=$IMAGE_NAME \
+                    --set image.tag=$IMAGE_TAG
+                    '''
+                }
             }
         }
     }
