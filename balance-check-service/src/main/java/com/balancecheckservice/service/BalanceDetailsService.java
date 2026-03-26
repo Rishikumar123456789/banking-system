@@ -5,10 +5,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.balancecheckservice.kafka.DepositEventComsumer;
 import com.balancecheckservice.kafka.WithdrawProcessedEventProducer;
 import com.balancecheckservice.model.BalanceDetails;
 import com.balancecheckservice.repo.BalanceDetailsRepo;
 import com.statebank.AccountOpenedEvent;
+import com.statebank.DepositEvent;
 import com.statebank.Withdraw;
 import com.statebank.WithdrawProcessedDetails;
 import com.statebank.WithdrawStatus;
@@ -19,13 +21,22 @@ public class BalanceDetailsService implements BalanceDetailsInterface {
     @Autowired
     public BalanceDetails balanceDetails;
 	@Autowired
-	public WithdrawProcessedEventProducer withdrawProcessedEventProducer;	
+	public WithdrawProcessedEventProducer withdrawProcessedEventProducer;
+	@Autowired
+	public  DepositEventComsumer depositEventComsumer;
 	@Override
 	public BalanceDetails updateBalanceDetails(AccountOpenedEvent event) {
 		  balanceDetails.setAccountNumber(event.getAccountNumber());
 		  balanceDetails.setName(event.getName());
 		  balanceDetails.setBalance(event.getBalance());
 		  return balanceDetailsRepo.save(balanceDetails);
+	}
+	@Override
+	public BalanceDetails updateBalanceDetailsfromDepositEvent(DepositEvent depositEvent) {
+		BalanceDetails balanceDetails=new BalanceDetails();
+		balanceDetails=balanceDetailsRepo.findByAccountNumber(depositEvent.getAccountNumber());
+		balanceDetails.setBalance(depositEvent.getDepositAmount());
+		return balanceDetailsRepo.save(balanceDetails);
 	}
 
 	@Override
@@ -54,6 +65,8 @@ public class BalanceDetailsService implements BalanceDetailsInterface {
 		  
 
 	}
+
+	
 	
 
 
