@@ -1,0 +1,21 @@
+replicaCount: 2
+
+image:
+  repository: rishikumarandugala/deposit-service
+  tag: "1.0"
+  pullPolicy: IfNotPresent
+
+containerPort: 9002
+
+service:
+  type: ClusterIP
+  port: 9002
+  targetPort: 9002
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "250m"
+    memory: "256Mi"

@@ -17,7 +17,7 @@ stages {
 
     stage('Clone Repository') {
         steps {
-            git branch: 'main', url: 'https://github.com/Rishikumar123456789/statebank.git'
+            git branch: 'main', url: 'https://github.com/Rishikumar123456789/banking-system.git'
         }
     }
 

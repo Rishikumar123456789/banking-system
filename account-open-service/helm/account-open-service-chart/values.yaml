@@ -1,0 +1,21 @@
+replicaCount: 2
+
+image:
+  repository: rishikumarandugala/account-open-service
+  tag: "1.0"
+  pullPolicy: IfNotPresent
+
+containerPort: 9001
+
+service:
+  type: ClusterIP
+  port: 9001
+  targetPort: 9001
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
