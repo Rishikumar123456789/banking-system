@@ -81,7 +81,7 @@
 		<dependency>
            <groupId>io.github.rishikumar123456789</groupId>
            <artifactId>statebank-library</artifactId>
-           <version>1.2</version>
+           <version>1.9</version>
         </dependency>
 	</dependencies>
 	<dependencyManagement>
