@@ -16,12 +16,13 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/Rishikumar123456789/banking-system.git'
+                git branch: 'main',
+                    url: 'https://github.com/Rishikumar123456789/banking-system.git'
             }
         }
 
-        // 🔥 FIXED: GitHub Packages authentication added
-        stage('Build withdraw-service') {
+        // ✅ Build Application with GitHub auth
+        stage('Build Application') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'github-creds',
@@ -51,14 +52,16 @@ EOF
             }
         }
 
+        // ✅ Build Docker Image
         stage('Build Docker Image') {
             steps {
-                dir('balance-check-service') {
+                dir('withdraw-service') {
                     sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
                 }
             }
         }
 
+        // ✅ DockerHub Login
         stage('Login to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
@@ -71,13 +74,14 @@ EOF
             }
         }
 
+        // ✅ Push Image
         stage('Push Image to DockerHub') {
             steps {
                 sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
             }
         }
 
-        // 🔥 NEW: Fix Kubernetes connection issue
+        // ✅ Configure EKS
         stage('Configure Kubeconfig') {
             steps {
                 sh '''
@@ -87,6 +91,7 @@ EOF
             }
         }
 
+        // ✅ Deploy using Helm
         stage('Deploy to Kubernetes using Helm') {
             steps {
                 sh """
@@ -100,10 +105,10 @@ EOF
 
     post {
         success {
-            echo "✅ Deployment successful! Kubernetes updated with new Docker image."
+            echo "✅ Withdraw Service deployed successfully!"
         }
         failure {
-            echo "❌ Pipeline failed. Please check Jenkins logs."
+            echo "❌ Pipeline failed. Check logs."
         }
     }
 }
