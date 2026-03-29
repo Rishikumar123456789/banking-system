@@ -9,18 +9,19 @@ pipeline {
     environment {
         IMAGE_NAME = "rishikumarandugala/state-bank-withdraw-service"
         IMAGE_TAG = "${BUILD_NUMBER}"
+        HELM_CHART_PATH = "withdraw-service/helm/withdraw-service-chart"
     }
 
     stages {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Rishikumar123456789/banking-system.git'
+                git branch: 'main', url: 'https://github.com/Rishikumar123456789/banking-system.git'
             }
         }
 
-        stage('Build Application') {
+        // 🔥 FIXED: GitHub Packages authentication added
+        stage('Build withdraw-service') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'github-creds',
@@ -52,7 +53,7 @@ EOF
 
         stage('Build Docker Image') {
             steps {
-                dir('withdraw-service') {
+                dir('account-open-service') {
                     sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
                 }
             }
@@ -76,6 +77,7 @@ EOF
             }
         }
 
+        // 🔥 NEW: Fix Kubernetes connection issue
         stage('Configure Kubeconfig') {
             steps {
                 sh '''
@@ -85,26 +87,23 @@ EOF
             }
         }
 
-        // ✅ FIXED HELM DEPLOY
         stage('Deploy to Kubernetes using Helm') {
             steps {
-                dir('withdraw-service') {
-                    sh """
-                    helm upgrade --install withdraw-service ./helm/withdraw-service-chart \
-                    --set image.repository=$IMAGE_NAME \
-                    --set image.tag=$IMAGE_TAG
-                    """
-                }
+                sh """
+                helm upgrade --install withdraw-service $HELM_CHART_PATH \
+                --set image.repository=$IMAGE_NAME \
+                --set image.tag=$IMAGE_TAG
+                """
             }
         }
     }
 
     post {
         success {
-            echo "✅ Withdraw Service deployed successfully!"
+            echo "✅ Deployment successful! Kubernetes updated with new Docker image."
         }
         failure {
-            echo "❌ Pipeline failed. Check logs."
+            echo "❌ Pipeline failed. Please check Jenkins logs."
         }
     }
 }
