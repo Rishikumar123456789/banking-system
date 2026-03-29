@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: rishikumarandugala/ withdraw-service
+  repository: rishikumarandugala/withdraw-service
   tag: "1.0"
   pullPolicy: IfNotPresent
 
