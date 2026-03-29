@@ -18,7 +18,7 @@ public class AccountDetailController {
     @Autowired
     public AccountDetailsService accountDetailsService;
 	@PostMapping("/saveAccountDetails")
-	public AccountDetails saveAccountDetails( @RequestBody Details details) {
+	public AccountDetails saveAccountDetails(@RequestBody Details details) {
 		 return accountDetailsService.saveAccountDetails(details);
 		    
 	}
