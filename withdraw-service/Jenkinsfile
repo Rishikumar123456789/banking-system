@@ -9,7 +9,6 @@ pipeline {
     environment {
         IMAGE_NAME = "rishikumarandugala/state-bank-withdraw-service"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        HELM_CHART_PATH = "withdraw-service/helm/withdraw-service-chart"
     }
 
     stages {
@@ -21,7 +20,6 @@ pipeline {
             }
         }
 
-        // ✅ Build Application with GitHub auth
         stage('Build Application') {
             steps {
                 withCredentials([usernamePassword(
@@ -52,7 +50,6 @@ EOF
             }
         }
 
-        // ✅ Build Docker Image
         stage('Build Docker Image') {
             steps {
                 dir('withdraw-service') {
@@ -61,7 +58,6 @@ EOF
             }
         }
 
-        // ✅ DockerHub Login
         stage('Login to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
@@ -74,14 +70,12 @@ EOF
             }
         }
 
-        // ✅ Push Image
         stage('Push Image to DockerHub') {
             steps {
                 sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
             }
         }
 
-        // ✅ Configure EKS
         stage('Configure Kubeconfig') {
             steps {
                 sh '''
@@ -91,14 +85,16 @@ EOF
             }
         }
 
-        // ✅ Deploy using Helm
+        // ✅ FIXED HELM DEPLOY
         stage('Deploy to Kubernetes using Helm') {
             steps {
-                sh """
-                helm upgrade --install withdraw-service $HELM_CHART_PATH \
-                --set image.repository=$IMAGE_NAME \
-                --set image.tag=$IMAGE_TAG
-                """
+                dir('withdraw-service') {
+                    sh """
+                    helm upgrade --install withdraw-service ./helm/withdraw-service-chart \
+                    --set image.repository=$IMAGE_NAME \
+                    --set image.tag=$IMAGE_TAG
+                    """
+                }
             }
         }
     }
