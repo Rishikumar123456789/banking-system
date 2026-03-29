@@ -88,7 +88,7 @@ EOF
         }
 
         stage('Deploy to Kubernetes using Helm') {
-            steps {
+             steps {
                 sh """
                 helm upgrade --install withdraw-service $HELM_CHART_PATH \
                 --set image.repository=$IMAGE_NAME \
